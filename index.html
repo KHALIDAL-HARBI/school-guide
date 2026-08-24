@@ -81,7 +81,7 @@ mark{background:#dfeaf3;color:var(--navy-deep);border-radius:4px;padding:0 2px}
           <div class="search-box">
             <input id="searchInput" type="search" autocomplete="off" placeholder="اكتب اسم المدرسة... مثل: ابن هشام" aria-label="البحث باسم المدرسة">
           </div>
-          <button class="clear-btn" id="clearBtn" type="button">مسح البحث</button>
+          <button class="clear-btn" id="clearBtn" type="button">ابحث</button>
         </div>
         <div class="filters">
           <div class="static-filter" aria-label="القطاعات">جميع القطاعات</div>
@@ -131,7 +131,7 @@ function render(){
  results.innerHTML=`<p class="match-count">تم العثور على ${list.length} نتيجة${list.length>80?' — يتم عرض أول 80 نتيجة':''}</p><div class="result-grid">${limited.map(card).join('')}</div>`;
 }
 [input,stageFilter,genderFilter].forEach(el=>el.addEventListener(el===input?'input':'change',render));
-clearBtn.addEventListener('click',()=>{input.value='';stageFilter.value='';genderFilter.value='';input.focus();render();});
+clearBtn.addEventListener('click',()=>{render();input.blur();});
 render();
 </script>
 </body>
