@@ -116,7 +116,7 @@ function norm(s){return (s||'').toString().toLowerCase().normalize('NFKD')
 function uniq(field){return [...new Set(schools.map(x=>x[field]).filter(Boolean).filter(x=>x!=='—'))].sort((a,b)=>a.localeCompare(b,'ar'));}
 function sectorKey(s){const n=norm(s);if(n.includes('الشمال'))return 'قطاع الشمال';if(n.includes('الجنوب'))return 'قطاع الجنوب';if(n.includes('الشرق'))return 'قطاع الشرق';if(n.includes('الغرب'))return 'قطاع الغرب';if(n.includes('بحره'))return 'بحرة';if(n.includes('الجموم'))return 'الجموم';return s||'';}
 function fillSelect(el,vals){vals.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;el.appendChild(o);})}
-fillSelect(stageFilter,['المرحلة الثانوية','المرحلة المتوسطة','المرحلة الابتدائية','رياض الأطفال'].filter(v=>schools.some(x=>x.stage===v)));fillSelect(genderFilter,uniq('gender'));
+fillSelect(stageFilter,['المرحلة الثانوية','المرحلة المتوسطة','المرحلة الابتدائية','طفولة مبكرة','رياض الأطفال']);fillSelect(genderFilter,uniq('gender'));
 function esc(s){return (s??'').toString().replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));}
 function highlight(text,q){if(!q)return esc(text); const nt=norm(text), nq=norm(q); if(!nq)return esc(text); const idx=nt.indexOf(nq); if(idx<0)return esc(text); return esc(text);}
 function card(r){return `<article class="school-card">
@@ -133,7 +133,10 @@ function card(r){return `<article class="school-card">
 </article>`}
 function render(){
  const q=input.value.trim(), nq=norm(q), sf=sectorFilter.value, st=stageFilter.value, gf=genderFilter.value;
- let list=schools.filter(r=>(!sf||sectorKey(r.sector)===sf)&&(!st||r.stage===st)&&(!gf||r.gender===gf));
+ let list=schools.filter(r=>{
+   const stageMatch=!st || (st==='طفولة مبكرة' ? (r.stage==='المرحلة الابتدائية' && norm(r.school_name).includes('طفوله') && norm(r.school_name).includes('مبكر')) : r.stage===st);
+   return (!sf||sectorKey(r.sector)===sf)&&stageMatch&&(!gf||r.gender===gf);
+ });
  if(nq) list=list.filter(r=>norm(r.school_name).includes(nq));
  if(!q && !sf && !st && !gf){results.innerHTML='';return;}
  if(!list.length){results.innerHTML='<div class="empty">لم يتم العثور على مدرسة مطابقة. جرّب جزءًا من الاسم أو غيّر عوامل التصفية.</div>';return;}
