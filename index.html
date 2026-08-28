@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;600;700;800&display=swap" rel="stylesheet">
@@ -545,13 +548,16 @@ fillSelect(gender,'جنس المدرسة'); fillSelect(county,'المحافظة'
 function isEarly(s){return s['طفولة مبكرة']==='نعم';}
 function stageMatch(s,val){
   if(!val)return true;
-  const st=String(s['المرحلة']||'').trim();
+  const st=String(s['المرحلة']||'').replace(/\s+/g,' ').trim();
   if(val==='early')return isEarly(s);
-  if(val==='primary')return st==='المرحلة الإبتدائية'&&!isEarly(s);
-  if(val==='middle')return st==='المرحلة المتوسطة';
-  if(val==='secondary')return st==='المرحلة الثانوية';
-  if(val==='kg')return st==='رياض الأطفال';
-  if(val==='adult')return st==='التعليم المستمر';
+  if(val==='primary'){
+    const primaryMatch=(st==='المرحلة الإبتدائية'||st==='المرحلة الابتدائية'||st.includes('ابتدائ')||st.includes('إبتدائ'));
+    return primaryMatch&&!isEarly(s);
+  }
+  if(val==='middle')return st==='المرحلة المتوسطة'||st.includes('متوسط');
+  if(val==='secondary')return st==='المرحلة الثانوية'||st.includes('ثانو');
+  if(val==='kg')return st==='رياض الأطفال'||st.includes('رياض الأطفال')||st.includes('رياض الاطفال');
+  if(val==='adult')return st==='التعليم المستمر'||st.includes('تعليم المستمر');
   return true;
 }
 function highlight(text,term){ return esc(text); }
@@ -580,7 +586,12 @@ function render(){
 searchInput.addEventListener('input',render);
 searchInput.addEventListener('change',render);
 searchInput.addEventListener('search',render);
-[stage,gender,county,schoolType].forEach(el=>el.addEventListener('change',render));
+[stage,gender,county,schoolType].forEach(el=>{
+  const refresh=()=>setTimeout(render,0);
+  el.addEventListener('change',refresh);
+  el.addEventListener('input',refresh);
+  el.addEventListener('blur',refresh);
+});
 searchBtn.addEventListener('click',render);
 searchInput.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();render();}});
 render();
